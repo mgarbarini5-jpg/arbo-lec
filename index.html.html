@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorios Arbo – Beneficios LEC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f6fa;color:#1a1a2e;min-height:100vh}
+.wrapper{max-width:960px;margin:0 auto;padding:32px 24px}
+.header{background:linear-gradient(135deg,#0a2463 0%,#1a4a8a 60%,#0f6e56 100%);border-radius:16px;padding:36px 40px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden}
+.header::after{content:'';position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.05)}
+.header-logo{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.header p{font-size:14px;color:rgba(255,255,255,0.75);margin-bottom:20px}
+.header-badges{display:flex;gap:10px;flex-wrap:wrap}
+.hbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:4px 12px;font-size:12px;color:#fff}
+.hbadge span{width:8px;height:8px;border-radius:50%;display:inline-block}
+.total-banner{background:linear-gradient(90deg,#0a2463,#1a4a8a);border-radius:12px;padding:22px 28px;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.total-banner .lbl{font-size:11px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.total-banner .val{font-size:30px;font-weight:800;line-height:1}
+.total-banner .sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:3px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #e8eaf0}
+.kpi-lbl{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.kpi-val{font-size:24px;font-weight:700;color:#0a2463;line-height:1.1}
+.kpi-val.green{color:#0f6e56}.kpi-val.gold{color:#b45309}
+.kpi-sub{font-size:11px;color:#9ca3af;margin-top:3px}
+.section{background:#fff;border-radius:12px;padding:22px 24px;border:1px solid #e8eaf0;margin-bottom:20px}
+.stitle{font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-blue{background:#0a2463}.dot-green{background:#0f6e56}.dot-gold{background:#b45309}
+table.gan{width:100%;border-collapse:collapse;font-size:13px}
+table.gan th{background:#f1f5f9;color:#374151;font-weight:600;padding:9px 13px;text-align:left;border-bottom:2px solid #e2e8f0}
+table.gan td{padding:9px 13px;border-bottom:1px solid #f1f5f9;color:#1f2937}
+table.gan tr:last-child td{font-weight:700;background:#f8fafc;color:#0a2463;border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-gold{background:#fef3c7;color:#92400e}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fbtn{border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:5px 14px;font-size:12px;cursor:pointer;color:#374151;transition:all .15s}
+.fbtn.active{background:#0a2463;color:#fff;border-color:#0a2463}
+.fbtn:hover:not(.active){background:#f3f4f6}
+.table-wrap{max-height:380px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px}
+table.bonos{width:100%;border-collapse:collapse;font-size:12px}
+table.bonos th{background:#f8fafc;color:#6b7280;font-weight:600;padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:1}
+table.bonos td{padding:7px 10px;border-bottom:1px solid #f3f4f6;color:#374151}
+table.bonos tr:hover td{background:#f9fafb}
+.c901{color:#0a2463;font-weight:600}.c900{color:#0f6e56;font-weight:600}
+.nota{background:#fef9f0;border:1px solid #fcd34d;border-radius:8px;padding:11px 15px;font-size:12px;color:#92400e;margin-bottom:20px}
+.chart-wrap{position:relative;height:250px}
+.footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:20px;padding-bottom:16px}
+.sync-bar{display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 14px;font-size:12px;color:#166534;margin-bottom:20px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.loading{text-align:center;padding:40px;color:#9ca3af;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<div class="header">
+  <div class="header-logo">Ley de Economía del Conocimiento · N° 27.506 / 27.570</div>
+  <h1>Laboratorios Arbo S.R.L.</h1>
+  <p>CUIT 30-70876718-9 &nbsp;·&nbsp; Actividad promovida: Biotecnología (Art. 2 inc. c)</p>
+  <div class="header-badges">
+    <div class="hbadge"><span style="background:#4ade80"></span>Beneficiaria activa desde 30/08/2021</div>
+    <div class="hbadge"><span style="background:#4ade80"></span>Régimen vigente hasta 2029</div>
+    <div class="hbadge"><span style="background:#f59e0b"></span>Próxima revalidación: ago. 2025</div>
+  </div>
+</div>
+
+<div class="sync-bar">
+  <span class="sync-dot"></span>
+  <span>Bonos actualizados en tiempo real desde Google Sheets · <span id="syncTime">Cargando…</span></span>
+</div>
+
+<div id="loadingMsg" class="loading">⏳ Cargando datos de bonos desde Google Sheets…</div>
+<div id="mainContent" style="display:none">
+
+<div class="total-banner">
+  <div>
+    <div class="lbl">Beneficio económico total acumulado</div>
+    <div class="val" id="totalARS">—</div>
+    <div class="sub">Bonos de crédito fiscal + reducción Impuesto a las Ganancias · 2021–2026</div>
+  </div>
+  <div style="text-align:right">
+    <div class="lbl">Equivalente en USD (TC BNA vendedor)</div>
+    <div class="val" id="totalUSD">—</div>
+    <div class="sub">Bonos: TC cierre de mes (período 931) · Ganancias: TC cierre de ejercicio</div>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-lbl">Bonos de crédito fiscal — ARS</div>
+    <div class="kpi-val" id="kpiBonos">—</div>
+    <div class="kpi-sub" id="kpiBonosSub">—</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Bonos — equivalente USD</div>
+    <div class="kpi-val green" id="kpiBonosUSD">—</div>
+    <div class="kpi-sub">TC vendedor BNA cierre del período 931</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Ahorro en Ganancias (2023–2025)</div>
+    <div class="kpi-val gold">$ 166.692.789</div>
+    <div class="kpi-sub">Reducción del 60 % sobre impuesto determinado</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Ahorro Ganancias — equiv. USD</div>
+    <div class="kpi-val gold">≈ USD 148.209</div>
+    <div class="kpi-sub">TC BNA vendedor cierre de cada ejercicio fiscal</div>
+  </div>
+</div>
+
+<div class="nota">
+  <strong>Nota metodológica:</strong> Los bonos de crédito fiscal se dolarizaron al tipo de cambio vendedor del BNA del último día hábil del período de la declaración jurada F.931. El ahorro en Ganancias se dolarizó al TC BNA vendedor de cierre de cada ejercicio: dic-2023 $828 | dic-2024 $1.053 | jun-2025 $1.215. TC 2026 basado en futuros ROFEX. Fuente: dolarhistorico.com / BNA.
+</div>
+
+<div class="section">
+  <div class="stitle"><span class="dot dot-gold"></span>Reducción en Impuesto a las Ganancias (Art. 10 LEC)</div>
+  <p style="font-size:13px;color:#6b7280;margin-bottom:14px">Laboratorios Arbo aplica una reducción del <strong>60 %</strong> sobre el impuesto a las ganancias determinado anualmente, en su carácter de Pequeña Empresa beneficiaria del régimen.</p>
+  <table class="gan">
+    <thead><tr><th>Ejercicio</th><th>Impuesto determinado</th><th>Reducción aplicada</th><th>Equiv. USD</th><th>% efectivo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>2023</strong></td><td>$ 24.845.558</td><td><span class="badge badge-gold">$ 10.703.463</span></td><td>≈ USD 12.923</td><td>43,1 %</td></tr>
+      <tr><td><strong>2024</strong></td><td>$ 90.495.815</td><td><span class="badge badge-gold">$ 54.297.489</span></td><td>≈ USD 51.589</td><td>60,0 %</td></tr>
+      <tr><td><strong>2025</strong></td><td>$ 169.480.396</td><td><span class="badge badge-gold">$ 101.691.837</span></td><td>≈ USD 83.697</td><td>60,0 %</td></tr>
+      <tr><td>TOTAL</td><td>$ 284.821.769</td><td>$ 166.692.789</td><td>≈ USD 148.209</td><td>58,5 %</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px;color:#9ca3af;margin-top:8px">* TC BNA vendedor cierre de ejercicio: dic-2023 $828 | dic-2024 $1.053 | jun-2025 $1.215</p>
+</div>
+
+<div class="section">
+  <div class="stitle"><span class="dot dot-blue"></span>Evolución anual de bonos de crédito fiscal</div>
+  <div class="chart-wrap"><canvas id="chartBonos"></canvas></div>
+</div>
+
+<div class="section">
+  <div class="stitle"><span class="dot dot-green"></span>Resumen de bonos por año (período 931)</div>
+  <table class="gan" id="tablaAnio"></table>
+</div>
+
+<div class="section">
+  <div class="stitle"><span class="dot dot-blue"></span>Detalle de bonos acreditados (<span id="totalCount">—</span> bonos)</div>
+  <div class="filters">
+    <button class="fbtn active" onclick="filtrar('todos',this)">Todos</button>
+    <button class="fbtn" onclick="filtrar('901',this)">Cód. 901 – Ganancias</button>
+    <button class="fbtn" onclick="filtrar('900',this)">Cód. 900 – IVA / Otros</button>
+    <button class="fbtn" onclick="filtrar('2021',this)">2021</button>
+    <button class="fbtn" onclick="filtrar('2022',this)">2022</button>
+    <button class="fbtn" onclick="filtrar('2023',this)">2023</button>
+    <button class="fbtn" onclick="filtrar('2024',this)">2024</button>
+    <button class="fbtn" onclick="filtrar('2025',this)">2025</button>
+    <button class="fbtn" onclick="filtrar('2026',this)">2026</button>
+  </div>
+  <div class="table-wrap">
+    <table class="bonos">
+      <thead><tr><th>N° Cert.</th><th>Período F.931</th><th>Tipo</th><th style="text-align:right">Monto ARS</th><th style="text-align:right">TC BNA</th><th style="text-align:right">Equiv. USD</th></tr></thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:#9ca3af;margin-top:8px" id="tablaCount"></p>
+</div>
+
+</div>
+
+<div class="footer">
+  <strong>Laboratorios Arbo S.R.L.</strong> · Régimen LEC – Ley N° 27.506/27.570 · Disposición DI-2021-711-APN-SSEC#MDP<br>
+  Bonos: Google Sheets (actualización automática) · TC fuente: BNA / ROFEX
+</div>
+</div>
+
+<script>
+const TC = {
+  '2021-09':104.00,'2021-10':105.00,'2021-11':106.00,'2021-12':107.75,
+  '2022-01':110.25,'2022-02':112.50,'2022-03':116.00,'2022-04':120.25,
+  '2022-05':125.25,'2022-06':130.00,'2022-07':137.25,'2022-08':145.00,
+  '2022-09':153.25,'2022-10':162.50,'2022-11':174.25,'2022-12':183.25,
+  '2023-01':194.00,'2023-02':204.00,'2023-03':215.50,'2023-04':229.00,
+  '2023-05':249.00,'2023-06':268.00,'2023-07':286.50,'2023-08':365.50,
+  '2023-09':365.50,'2023-10':365.50,'2023-11':376.00,'2023-12':828.25,
+  '2024-01':845.50,'2024-02':861.00,'2024-03':876.00,'2024-04':896.00,
+  '2024-05':914.00,'2024-06':930.50,'2024-07':951.50,'2024-08':972.00,
+  '2024-09':990.00,'2024-10':1011.50,'2024-11':1031.00,'2024-12':1052.50,
+  '2025-01':1073.50,'2025-02':1084.25,'2025-03':1093.50,'2025-04':1190.00,
+  '2025-05':1195.00,'2025-06':1215.00,'2025-07':1380.00,'2025-08':1370.00,
+  '2025-09':1400.00,'2025-10':1475.00,'2025-11':1475.00,'2025-12':1480.00,
+  '2026-01':1484.00,'2026-02':1417.00,'2026-03':1453.50,'2026-04':1488.50,
+  '2026-05':1415.00,'2026-06':1450.00,'2026-07':1690.50,'2026-08':1743.00,
+  '2026-09':1783.00
+};
+
+const MESES = {
+  'jan':'01','feb':'02','mar':'03','apr':'04','may':'05','jun':'06',
+  'jul':'07','aug':'08','sep':'09','oct':'10','nov':'11','dec':'12',
+  'ene':'01','abr':'04','ago':'08','sept':'09','dic':'12'
+};
+
+function parsePeriodo(s) {
+  if (!s) return null;
+  s = String(s).trim();
+  // Formato largo: "Wed Sep 01 2021 04:00:00 GMT-0300..."
+  const mLong = s.match(/([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+  if (mLong) {
+    const mes = MESES[mLong[1].toLowerCase()];
+    if (!mes) return null;
+    return mLong[3] + '-' + mes;
+  }
+  // Formato corto: "sept-21", "ene-22"
+  s = s.toLowerCase();
+  const mShort = s.match(/^([a-z]+)-(\d{2})$/);
+  if (!mShort) return null;
+  const mes = MESES[mShort[1]];
+  if (!mes) return null;
+  const yr = parseInt(mShort[2]) + 2000;
+  return yr + '-' + mes;
+}
+
+const fARS = v => '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fUSD = v => v == null ? '–' : 'USD ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fTC  = v => v == null ? '–' : '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzf3kp6c8cSL6eFBK92oRGW7zWDBPY8AOaKLe4ZM1x4onoYaohySUtuyzB_HS4Dc7B4gA/exec';
+
+let DATA = [];
+let chartInstance = null;
+
+function processRows(raw) {
+  const rows = [];
+  for (const r of raw) {
+    const cert = parseInt(r[0]);
+    const cod  = parseInt(r[1]);
+    if (isNaN(cert) || cert < 100) continue;
+    if (cod !== 900 && cod !== 901) continue;
+    const periodoKey = parsePeriodo(r[2]);
+    if (!periodoKey) continue;
+    // El Apps Script elimina la coma decimal y devuelve el número entero (ej: 47.361,94 → 4736194)
+    // Hay que dividir por 100 para recuperar el valor real
+    const monto = parseFloat(r[3]);
+    if (!monto || isNaN(monto)) continue;
+    const tc  = TC[periodoKey] || null;
+    const usd = tc ? Math.round(monto / tc * 100) / 100 : null;
+    const yr  = periodoKey.split('-')[0];
+    const mm  = periodoKey.split('-')[1];
+    rows.push({ cert, cod, tipo: cod===901 ? '901 – Ganancias' : '900 – IVA / Otros',
+      periodo: mm+'/'+yr, periodoKey, year: yr, monto_ars: monto, tc_bna: tc, monto_usd: usd });
+  }
+  return rows;
+}
+
+function renderAll() {
+  const total_ars = DATA.reduce((s,r) => s + r.monto_ars, 0);
+  const total_usd = DATA.reduce((s,r) => s + (r.monto_usd||0), 0);
+  const gan_ars = 166692789, gan_usd = 148209;
+
+  document.getElementById('totalARS').textContent = fARS(total_ars + gan_ars);
+  document.getElementById('totalUSD').textContent = '≈ ' + fUSD(total_usd + gan_usd);
+  document.getElementById('kpiBonos').textContent = fARS(total_ars);
+  document.getElementById('kpiBonosUSD').textContent = '≈ ' + fUSD(total_usd);
+  document.getElementById('kpiBonosSub').textContent = DATA.length + ' bonos · sep/2021 a ' + DATA[DATA.length-1].periodo;
+  document.getElementById('totalCount').textContent = DATA.length;
+
+  // Tabla anual
+  const am = {};
+  DATA.forEach(r => {
+    if (!am[r.year]) am[r.year] = {ars:0, usd:0};
+    am[r.year].ars += r.monto_ars;
+    am[r.year].usd += (r.monto_usd||0);
+  });
+  let html = '<thead><tr><th>Año</th><th style="text-align:right">Total ARS</th><th style="text-align:right">Equiv. USD</th><th style="text-align:right">TC implícito promedio</th></tr></thead><tbody>';
+  let tA=0, tU=0;
+  Object.keys(am).sort().forEach(yr => {
+    const {ars, usd} = am[yr]; tA+=ars; tU+=usd;
+    html += `<tr><td><strong>${yr}</strong></td><td style="text-align:right">${fARS(ars)}</td><td style="text-align:right;font-weight:600;color:#0f6e56">${fUSD(usd)}</td><td style="text-align:right;color:#6b7280">$ ${Math.round(ars/usd).toLocaleString('es-AR')}</td></tr>`;
+  });
+  html += `<tr><td>TOTAL</td><td style="text-align:right">${fARS(tA)}</td><td style="text-align:right">${fUSD(tU)}</td><td style="text-align:right;color:#9ca3af">–</td></tr></tbody>`;
+  document.getElementById('tablaAnio').innerHTML = html;
+
+  // Chart
+  const years = [...new Set(DATA.map(r=>r.year))].sort();
+  const d901 = years.map(y => DATA.filter(r=>r.cod===901&&r.year===y).reduce((s,r)=>s+r.monto_ars,0));
+  const d900 = years.map(y => DATA.filter(r=>r.cod===900&&r.year===y).reduce((s,r)=>s+r.monto_ars,0));
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(document.getElementById('chartBonos'), {
+    type: 'bar',
+    data: { labels: years, datasets: [
+      {label:'Cód. 901 – Ganancias', data:d901, backgroundColor:'#1a4a8a', borderRadius:4},
+      {label:'Cód. 900 – IVA / Otros', data:d900, backgroundColor:'#0f6e56', borderRadius:4}
+    ]},
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:12},boxWidth:14}},
+        tooltip:{callbacks:{label:ctx=>' '+fARS(ctx.raw)}}},
+      scales:{x:{grid:{display:false}}, y:{ticks:{callback:v=>'$'+Number(v/1e6).toFixed(1)+'M'}, grid:{color:'#f3f4f6'}}}}
+  });
+
+  filtrar('todos', document.querySelector('.fbtn.active'));
+}
+
+function renderTabla(data) {
+  document.getElementById('tablaBody').innerHTML = data.map(r => `<tr>
+    <td>${r.cert}</td><td>${r.periodo}</td>
+    <td><span class="${r.cod===901?'c901':'c900'}">${r.tipo}</span></td>
+    <td style="text-align:right">${fARS(r.monto_ars)}</td>
+    <td style="text-align:right;color:#6b7280">${fTC(r.tc_bna)}</td>
+    <td style="text-align:right;font-weight:600">${fUSD(r.monto_usd)}</td>
+  </tr>`).join('');
+  document.getElementById('tablaCount').textContent = `Mostrando ${data.length} de ${DATA.length} bonos`;
+}
+
+function filtrar(tipo, btn) {
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  let f = DATA;
+  if (tipo==='901') f = DATA.filter(r=>r.cod===901);
+  else if (tipo==='900') f = DATA.filter(r=>r.cod===900);
+  else if (['2021','2022','2023','2024','2025','2026'].includes(tipo)) f = DATA.filter(r=>r.year===tipo);
+  renderTabla(f);
+}
+
+// ── JSONP loader ────────────────────────────────────────────────────────────
+function loadData() {
+  window._lec_callback = function(raw) {
+    try {
+      DATA = processRows(raw);
+      document.getElementById('loadingMsg').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      const now = new Date();
+      document.getElementById('syncTime').textContent =
+        'Última actualización: ' + now.toLocaleDateString('es-AR') + ' ' +
+        now.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+      renderAll();
+    } catch(e) {
+      document.getElementById('loadingMsg').textContent = '⚠️ Error procesando los datos: ' + e.message;
+    }
+    // Cleanup
+    delete window._lec_callback;
+    const s = document.getElementById('_jsonp_script');
+    if (s) s.remove();
+  };
+
+  const script = document.createElement('script');
+  script.id = '_jsonp_script';
+  script.src = SCRIPT_URL + '?callback=_lec_callback&t=' + Date.now();
+  script.onerror = () => {
+    document.getElementById('loadingMsg').textContent = '⚠️ No se pudieron cargar los datos. Verificá la conexión.';
+  };
+  document.head.appendChild(script);
+}
+
+loadData();
+</script>
+</body>
+</html>
